@@ -293,7 +293,6 @@ impl Client {
         let handler_fn: Box<EventHandlerFn> = Box::new(move |data| {
             let maybe_fut = serde_json::from_str(data.raw.get())
                 .map(|ev| handler.clone().handle_event(ev, data));
-            warn!("Logging started ....{}",Ev::TYPE.unwrap().to_string());
             Box::pin(async move {
                 match maybe_fut {
                     Ok(Some(fut)) => {

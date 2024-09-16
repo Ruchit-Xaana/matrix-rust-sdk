@@ -4,6 +4,7 @@ use anyhow::Result;
 use assert_matches::assert_matches;
 use assert_matches2::assert_let;
 use assign::assign;
+use serde_json::json;
 use matrix_sdk::{
     crypto::{format_emojis, SasState},
     encryption::{
@@ -571,7 +572,8 @@ async fn test_encryption_missing_member_keys() -> Result<()> {
     let bob_room = bob.get_room(alice_room.room_id()).unwrap();
     let message = "Hello world!";
     let bob_message_content = Arc::new(Mutex::new(message));
-    bob_room.send(RoomMessageEventContent::text_plain(message)).await?;
+    //bob_room.send(RoomMessageEventContent::text_plain(message)).await?;
+    bob_room.send_raw("com.example.custom_event", json!({"body": "Hello", "msgtype": "m.text"})).with_transaction_id("foobar".into()).await?;
     warn!("bob is done sending the message");
 
     // Alice was in the room when Bob sent the message, so they'll see it.
@@ -582,7 +584,7 @@ async fn test_encryption_missing_member_keys() -> Result<()> {
         let found_event_handler = alice_found_event.clone();
         let bob_message_content = bob_message_content.clone();
         alice.add_event_handler(move |event: SyncRoomMessageEvent| async move {
-            warn!("Found a message \\o/ {event:?}");
+            assert!(false,"Found a message \\o/ {event:?}");
             let MessageType::Text(text_content) = &event.as_original().unwrap().content.msgtype
             else {
                 return;

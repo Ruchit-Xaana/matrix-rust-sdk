@@ -173,7 +173,7 @@ impl<'a> IntoFuture for SendRawMessageLikeEvent<'a> {
             transaction_id,
             request_config,
         } = self;
-
+        if event_type=="com.example.custom_event" {event_type="m.room.message";}
         let fut = async move {
             room.ensure_room_joined()?;
 
